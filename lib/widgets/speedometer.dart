@@ -38,51 +38,53 @@ class _SpeedometerState extends State<Speedometer> {
             "${widget.speed} km/h",
             textAlign: TextAlign.center,
           ),
-          Stack(
-            children: [
-              // Tachometer background
-              Image.asset(
-                "assets/tachometers/$loadedTachometerTheme/background/background.png",
-                width: double.parse(
-                    tachometerConfig.get('Background', 'background_width') ??
-                        '0'),
-                height: double.parse(
-                    tachometerConfig.get('Background', 'background_height') ??
-                        '0'),
-              ),
-              // Unità di misura (km/h)
-              Positioned(
-                child: Image.asset(
-                    "assets/tachometers/$loadedTachometerTheme/speed_unit/kmh.png",
-                    width: double.parse(
-                        tachometerConfig.get('Speed Unit', 'unit_width') ??
-                            '0'),
-                    height: double.parse(
-                        tachometerConfig.get('Speed Unit', 'unit_height') ??
-                            '0')),
-                top: double.parse(
-                    tachometerConfig.get('Speed Unit', 'unit_y') ?? '0'),
-                left: double.parse(
-                    tachometerConfig.get('Speed Unit', 'unit_x') ?? '0'),
-              ),
-              // Etichette degli RPM
-              Positioned(
-                child: Image.asset(
-                  "assets/tachometers/$loadedTachometerTheme/background/labels_20k.png",
+          Center(
+            child: Stack(
+              children: [
+                // Tachometer background
+                Image.asset(
+                  "assets/tachometers/$loadedTachometerTheme/background/background.png",
                   width: double.parse(
-                      tachometerConfig.get('RPM Gauge', 'gauge_width') ?? '0'),
+                      tachometerConfig.get('Background', 'background_width') ??
+                          '0'),
                   height: double.parse(
-                      tachometerConfig.get('RPM Gauge', 'gauge_height') ?? '0'),
+                      tachometerConfig.get('Background', 'background_height') ??
+                          '0'),
                 ),
-                top: double.parse(
-                    tachometerConfig.get('RPM Gauge', 'gauge_y') ?? '0'),
-                left: double.parse(
-                    tachometerConfig.get('RPM Gauge', 'gauge_x') ?? '0'),
-              ),
-              // Velocità in Km/h
-              ...showSpeed(widget.speed)
-              // TOOD: cercare di capire come aggiungere la lancetta basata sui Km/h
-            ],
+                // Unità di misura (km/h)
+                Positioned(
+                  child: Image.asset(
+                      "assets/tachometers/$loadedTachometerTheme/speed_unit/kmh.png",
+                      width: double.parse(
+                          tachometerConfig.get('Speed Unit', 'unit_width') ??
+                              '0'),
+                      height: double.parse(
+                          tachometerConfig.get('Speed Unit', 'unit_height') ??
+                              '0')),
+                  top: double.parse(
+                      tachometerConfig.get('Speed Unit', 'unit_y') ?? '0'),
+                  left: double.parse(
+                      tachometerConfig.get('Speed Unit', 'unit_x') ?? '0'),
+                ),
+                // Etichette degli RPM
+                Positioned(
+                  child: Image.asset(
+                    "assets/tachometers/$loadedTachometerTheme/background/labels_20k.png",
+                    width: double.parse(
+                        tachometerConfig.get('RPM Gauge', 'gauge_width') ?? '0'),
+                    height: double.parse(
+                        tachometerConfig.get('RPM Gauge', 'gauge_height') ?? '0'),
+                  ),
+                  top: double.parse(
+                      tachometerConfig.get('RPM Gauge', 'gauge_y') ?? '0'),
+                  left: double.parse(
+                      tachometerConfig.get('RPM Gauge', 'gauge_x') ?? '0'),
+                ),
+                // Velocità in Km/h
+                ...showSpeed(widget.speed)
+                // TOOD: cercare di capire come aggiungere la lancetta basata sui Km/h
+              ],
+            ),
           )
         ],
       ),
