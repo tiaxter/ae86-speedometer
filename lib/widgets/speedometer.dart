@@ -79,8 +79,9 @@ class _SpeedometerState extends State<Speedometer> {
                 left: double.parse(
                     tachometerConfig.get('RPM Gauge', 'gauge_x') ?? '0'),
               ),
-              //
+              // Velocità in Km/h
               ...showSpeed(widget.speed)
+              // TOOD: cercare di capire come aggiungere la lancetta basata sui Km/h
             ],
           )
         ],
