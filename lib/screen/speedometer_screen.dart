@@ -68,8 +68,9 @@ class SpeedometerScreen extends StatelessWidget {
                 }
 
                 var data = snapshot.data as LocationData;
-                double speed =
-                    double.parse(((data.speed ?? 0) * 3.6).toStringAsFixed(2));
+                double speed = double.parse(
+                    ((data.speed ?? 0) * 3.6).toStringAsFixed(2)
+                );
                 return Speedometer(speed: speed);
               });
         });
