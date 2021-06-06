@@ -60,6 +60,7 @@ flutter:
     - assets/tachometers/D7/background/
     - assets/tachometers/D7/speed_unit/
     - assets/tachometers/D7/speed_yellow/
+    - assets/tachometers/D7/rpm_bar/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
