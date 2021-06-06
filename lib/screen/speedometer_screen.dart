@@ -54,25 +54,8 @@ class SpeedometerScreen extends StatelessWidget {
             return Text(snapshot.error.toString());
           }
 
-          return StreamBuilder(
-              stream: (snapshot.data as Stream),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return Text(snapshot.error.toString());
-                }
-
-                var data = snapshot.data as LocationData;
-                double speed = double.parse(
-                    ((data.speed ?? 0) * 3.6).toStringAsFixed(2)
-                );
-                return Speedometer(speed: speed);
-              });
+          Stream stream = snapshot.data as Stream;
+          return Speedometer(stream: stream);
         });
   }
 }
