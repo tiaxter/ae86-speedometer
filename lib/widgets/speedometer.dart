@@ -45,7 +45,7 @@ class _SpeedometerState extends State<Speedometer> {
         });
   }
 
-  List<Widget> showSpeed(double speed, Config tachometerConfig) {
+  Widget showSpeed(double speed, Config tachometerConfig) {
     String roundedSpeed = (speed.toInt()).toString();
     List<Widget> widgets = [];
     double speedDigitWidth = double.parse(tachometerConfig.get('Speed', 'speed_width') ?? '0');
@@ -54,18 +54,23 @@ class _SpeedometerState extends State<Speedometer> {
     double speedDigitX = double.parse(tachometerConfig.get('Speed', 'speed_x') ?? '0');
 
     for (int i = 0; i < roundedSpeed.length; i++) {
-      widgets.add(Positioned(
-          child: Image.asset(
+      widgets.add(
+          Image.asset(
             "assets/tachometers/$loadedTachometerTheme/speed_yellow/speed_digits_${roundedSpeed[i]}.png",
             width: speedDigitWidth,
             height: speedDigitHeight,
-          ),
-          top: speedDigitY,
-          // x - (width * i)
-          left: speedDigitX - (speedDigitWidth * (roundedSpeed.length - (i + 1)))));
+          )
+      );
     }
 
-    return widgets;
+
+    return Positioned(
+      child: Row(
+        children: widgets,
+      ),
+      top: speedDigitY,
+      left: speedDigitX - ((roundedSpeed.length - 1) * (speedDigitWidth)),
+    );
   }
 
   Widget showSpeedIndicator(Config tachometerConfig) {
@@ -127,7 +132,7 @@ class _SpeedometerState extends State<Speedometer> {
 
   Future<Config> loadSpeedometerConfig() async {
     String configString =
-        await rootBundle.loadString("assets/tachometers/$loadedTachometerTheme/theme_config.ini");
+    await rootBundle.loadString("assets/tachometers/$loadedTachometerTheme/theme_config.ini");
     return Config.fromString(configString);
   }
 
@@ -160,16 +165,16 @@ class _SpeedometerState extends State<Speedometer> {
                 Image.asset(
                   "assets/tachometers/$loadedTachometerTheme/background/background.png",
                   width:
-                      double.parse(tachometerConfig.get('Background', 'background_width') ?? '0'),
+                  double.parse(tachometerConfig.get('Background', 'background_width') ?? '0'),
                   height:
-                      double.parse(tachometerConfig.get('Background', 'background_height') ?? '0'),
+                  double.parse(tachometerConfig.get('Background', 'background_height') ?? '0'),
                 ),
                 // Unità di misura (km/h)
                 Positioned(
                   child: Image.asset("assets/tachometers/$loadedTachometerTheme/speed_unit/kmh.png",
                       width: double.parse(tachometerConfig.get('Speed Unit', 'unit_width') ?? '0'),
                       height:
-                          double.parse(tachometerConfig.get('Speed Unit', 'unit_height') ?? '0')),
+                      double.parse(tachometerConfig.get('Speed Unit', 'unit_height') ?? '0')),
                   top: double.parse(tachometerConfig.get('Speed Unit', 'unit_y') ?? '0'),
                   left: double.parse(tachometerConfig.get('Speed Unit', 'unit_x') ?? '0'),
                 ),
@@ -189,22 +194,16 @@ class _SpeedometerState extends State<Speedometer> {
                     stream: widget.stream,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Row(
-                          children: showSpeed(0, tachometerConfig),
-                        );
+                        return showSpeed(0, tachometerConfig);
                       }
 
                       if (snapshot.hasError) {
-                        return Row(
-                          children: showSpeed(0, tachometerConfig),
-                        );
+                        return showSpeed(0, tachometerConfig);
                       }
 
                       var data = snapshot.data as LocationData;
                       double speed = double.parse(((data.speed ?? 0) * 3.6).toStringAsFixed(2));
-                      return Row(
-                        children: showSpeed(speed, tachometerConfig),
-                      );
+                      return showSpeed(speed, tachometerConfig);
                     }),
                 // TOOD: cercare di capire come aggiungere la lancetta basata sui Km/h
                 showSpeedIndicator(tachometerConfig),
