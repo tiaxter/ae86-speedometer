@@ -102,9 +102,9 @@ class _SpeedometerState extends State<Speedometer> {
     // Posiziono al centro dello schermo l'indicatore della velocità
     return Positioned(
       left: rpmCenterX,
-      top: rpmCenterY - (rpmImageWidth/2),
+      top: rpmCenterY - rpmY,
       child: Transform.rotate(
-        angle: 360 * (-(pi)/180),
+        angle: 270 * (-(pi)/180),
         alignment: Alignment.centerLeft,
         child: Container(
           margin: EdgeInsets.only(
