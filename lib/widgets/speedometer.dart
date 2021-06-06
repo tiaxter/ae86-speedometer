@@ -94,30 +94,30 @@ class _SpeedometerState extends State<Speedometer> {
   List<Widget> showSpeed(double speed) {
     String roundedSpeed = (speed.toInt()).toString();
     List<Widget> widgets = [];
+    double speedDigitWidth = double.parse(
+        tachometerConfig.get('Speed', 'speed_width') ?? '0'
+    );
+    double speedDigitHeight = double.parse(
+    tachometerConfig.get('Speed', 'speed_height') ?? '0'
+    );
+    double speedDigitY = double.parse(
+        tachometerConfig.get('Speed', 'speed_y') ?? '0'
+    );
+    double speedDigitX = double.parse(
+        tachometerConfig.get('Speed', 'speed_x') ?? '0'
+    );
 
     for (int i = 0; i < roundedSpeed.length; i++) {
       widgets.add(
         Positioned(
             child: Image.asset(
               "assets/tachometers/$loadedTachometerTheme/speed_yellow/speed_digits_${roundedSpeed[i]}.png",
-              width: double.parse(
-                tachometerConfig.get('Speed', 'speed_width') ?? '0'
-              ),
-              height: double.parse(
-                  tachometerConfig.get('Speed', 'speed_height') ?? '0'
-              ),
+              width: speedDigitWidth,
+              height: speedDigitHeight,
             ),
-            top: double.parse(
-                tachometerConfig.get('Speed', 'speed_y') ?? '0'
-            ),
+            top: speedDigitY,
             // x - (width * i)
-            left: double.parse(
-                tachometerConfig.get('Speed', 'speed_x') ?? '0'
-            ) - (
-                double.parse(
-                    tachometerConfig.get('Speed', 'speed_width') ?? '0'
-                ) * (roundedSpeed.length - (i + 1))
-            )
+            left: speedDigitX - (speedDigitWidth * (roundedSpeed.length - (i + 1)))
         )
       );
     }
