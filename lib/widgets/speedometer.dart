@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:ae86_speedometer/utils/speed_utils.dart';
 import 'package:ae86_speedometer/widgets/speedometer_speed_digits.dart';
 import 'package:ae86_speedometer/tasks/play_chime_background_task.dart';
 import 'package:audio_service/audio_service.dart';
@@ -14,11 +15,12 @@ class Speedometer extends StatefulWidget {
   final String theme;
   final String speedUnit;
 
-  Speedometer(
-      {required this.stream,
-      required this.tachometerConfig,
-      required this.theme,
-      required this.speedUnit});
+  Speedometer({
+    required this.stream,
+    required this.tachometerConfig,
+    required this.theme,
+    required this.speedUnit,
+  });
 
   @override
   _SpeedometerState createState() => _SpeedometerState();
@@ -35,15 +37,10 @@ class _SpeedometerState extends State<Speedometer> {
 
   Widget showSpeedIndicator(Config tachometerConfig) {
     double rpmCenterX = double.parse(tachometerConfig.get('RPM Bar', 'rpm_center_x') ?? '0');
-
     double rpmCenterY = double.parse(tachometerConfig.get('RPM Bar', 'rpm_center_y') ?? '0');
-
     double rpmX = double.parse(tachometerConfig.get('RPM Bar', 'rpm_x') ?? '0');
-
     double rpmY = double.parse(tachometerConfig.get('RPM Bar', 'rpm_y') ?? '0');
-
     double rpmImageWidth = double.parse(tachometerConfig.get('RPM Bar', 'rpm_width') ?? '0');
-
     double rpmImageHeight = double.parse(tachometerConfig.get('RPM Bar', 'rpm_height') ?? '0');
 
     // Posiziono al centro dello schermo l'indicatore della velocità
@@ -104,14 +101,14 @@ class _SpeedometerState extends State<Speedometer> {
 
                 if (snapshot.data != null) {
                   var data = snapshot.data as LocationData;
-                  speed = roundedSpeed(data.speed ?? 0);
+                  speed = data.speed ?? 0;
                 }
 
                 if (speedUnit == 'mph') {
-                  speed = toMph(speed);
+                  speed = SpeedUtils.toMph(speed);
                 }
                 return Text(
-                  "${roundedSpeed(speed)} $speedUnit",
+                  "${SpeedUtils.getIntVal(speed)} $speedUnit",
                   textAlign: TextAlign.center,
                 );
               }),
@@ -166,16 +163,17 @@ class _SpeedometerState extends State<Speedometer> {
                       }
 
                       if (speedUnit == 'mph') {
-                        speed = toMph(speed);
+                        speed = SpeedUtils.toMph(speed);
                       }
 
                       return SpeedometerSpeedDigits(
-                          speed: roundedSpeed(speed),
+                          speed: SpeedUtils.getIntVal(speed),
                           speedDigitWidth: speedDigitWidth,
                           speedDigitHeight: speedDigitHeight,
                           speedDigitX: speedDigitX,
                           speedDigitY: speedDigitY,
-                          theme: widget.theme);
+                          theme: widget.theme
+                      );
                     }),
                 // TOOD: cercare di capire come aggiungere la lancetta basata sui Km/h
                 showSpeedIndicator(tachometerConfig),
@@ -185,13 +183,5 @@ class _SpeedometerState extends State<Speedometer> {
         ],
       ),
     );
-  }
-
-  double toMph(double speedKmh) {
-    return speedKmh / 1.609;
-  }
-
-  double roundedSpeed(double rawSpeed) {
-    return double.parse((rawSpeed).toStringAsFixed(2));
   }
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class SpeedometerSpeedDigits extends StatelessWidget {
-  double speed;
-  double speedDigitWidth;
-  double speedDigitHeight;
-  double speedDigitX;
-  double speedDigitY;
-  String theme;
+  final double speed;
+  final double speedDigitWidth;
+  final double speedDigitHeight;
+  final double speedDigitX;
+  final double speedDigitY;
+  final String theme;
 
   SpeedometerSpeedDigits(
       {Key? key,
