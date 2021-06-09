@@ -1,5 +1,9 @@
 import 'package:ae86_speedometer/widgets/speedometer.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:ini/ini.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:location/location.dart';
 
 class SpeedometerScreen extends StatelessWidget {
@@ -41,6 +45,11 @@ class SpeedometerScreen extends StatelessWidget {
     return location.onLocationChanged;
   }
 
+  Future<Config> _loadTachometerConfig(String theme) async {
+    String configString = await rootBundle.loadString("assets/tachometers/$theme/theme_config.ini");
+    return Config.fromString(configString);
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -55,7 +64,29 @@ class SpeedometerScreen extends StatelessWidget {
           }
 
           Stream stream = snapshot.data as Stream;
-          return Speedometer(stream: stream);
+          return ValueListenableBuilder(
+            valueListenable: Hive.box('app').listenable(),
+            builder: (context, Box box, widget) {
+              String theme = box.get('theme', defaultValue: 'D7');
+              String speedUnit = box.get('speed_unit', defaultValue: 'kmh');
+
+              return FutureBuilder(
+                future: _loadTachometerConfig(theme),
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    return Text('Loading...');
+                  }
+
+                  return Speedometer(
+                    stream: stream,
+                    tachometerConfig: (snapshot.data as Config),
+                    theme: theme,
+                    speedUnit: speedUnit,
+                  );
+                },
+              );
+            },
+          );
         });
   }
 }

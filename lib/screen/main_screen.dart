@@ -14,8 +14,10 @@ class MainScreen extends StatelessWidget {
               child: GestureDetector(
                   child: Icon(Icons.app_settings_alt),
                   onTap: () {
-                    Navigator.push(
-                        context, MaterialPageRoute(builder: (context) => SettingsScreen()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      return SettingsScreen();
+
+                    }));
                   }),
             )
           ],

@@ -1,10 +1,8 @@
 import 'dart:math';
-
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:ae86_speedometer/widgets/speedometer_speed_digits.dart';
 import 'package:ae86_speedometer/tasks/play_chime_background_task.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:ini/ini.dart';
 import 'package:location/location.dart';
 
@@ -12,65 +10,27 @@ void _entrypoint() => AudioServiceBackground.run(() => PlayChimeBackgroundTask()
 
 class Speedometer extends StatefulWidget {
   final Stream stream;
+  final Config tachometerConfig;
+  final String theme;
+  final String speedUnit;
 
-  Speedometer({required this.stream});
+  Speedometer(
+      {required this.stream,
+      required this.tachometerConfig,
+      required this.theme,
+      required this.speedUnit});
 
   @override
   _SpeedometerState createState() => _SpeedometerState();
 }
 
 class _SpeedometerState extends State<Speedometer> {
-  final String loadedTachometerTheme = 'D7';
   final double maxSpeed = 10;
 
   @override
   Widget build(BuildContext context) {
     // playChime();
-    return FutureBuilder(
-        future: loadSpeedometerConfig(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return Text('Ops... An error occurred');
-          }
-
-          Config tachometerConfig = (snapshot.data as Config);
-
-          return speedometer(tachometerConfig, widget.stream);
-        });
-  }
-
-  Widget showSpeed(double speed, Config tachometerConfig) {
-    String roundedSpeed = (speed.toInt()).toString();
-    List<Widget> widgets = [];
-    double speedDigitWidth = double.parse(tachometerConfig.get('Speed', 'speed_width') ?? '0');
-    double speedDigitHeight = double.parse(tachometerConfig.get('Speed', 'speed_height') ?? '0');
-    double speedDigitY = double.parse(tachometerConfig.get('Speed', 'speed_y') ?? '0');
-    double speedDigitX = double.parse(tachometerConfig.get('Speed', 'speed_x') ?? '0');
-
-    for (int i = 0; i < roundedSpeed.length; i++) {
-      widgets.add(
-          Image.asset(
-            "assets/tachometers/$loadedTachometerTheme/speed_yellow/speed_digits_${roundedSpeed[i]}.png",
-            width: speedDigitWidth,
-            height: speedDigitHeight,
-          )
-      );
-    }
-
-
-    return Positioned(
-      child: Row(
-        children: widgets,
-      ),
-      top: speedDigitY,
-      left: speedDigitX - ((roundedSpeed.length - 1) * (speedDigitWidth)),
-    );
+    return speedometer(widget.tachometerConfig, widget.stream);
   }
 
   Widget showSpeedIndicator(Config tachometerConfig) {
@@ -91,7 +51,7 @@ class _SpeedometerState extends State<Speedometer> {
       left: rpmCenterX,
       top: rpmCenterY - rpmY,
       child: Transform.rotate(
-        angle: 270 * (-(pi) / 180),
+        angle: 90 * ((pi) / 180),
         alignment: Alignment.centerLeft,
         child: Container(
           margin: EdgeInsets.only(
@@ -100,7 +60,7 @@ class _SpeedometerState extends State<Speedometer> {
           child: RotatedBox(
             quarterTurns: 1,
             child: Image.asset(
-              "assets/tachometers/$loadedTachometerTheme/rpm_bar/rpm_bar.png",
+              "assets/tachometers/${widget.theme}/rpm_bar/rpm_bar.png",
               width: rpmImageWidth,
               height: rpmImageHeight,
             ),
@@ -110,51 +70,48 @@ class _SpeedometerState extends State<Speedometer> {
     );
   }
 
-/*
-  void playChime() async {
-    AudioService.connect();
+  /*
+    void playChime() async {
+      AudioService.connect();
 
-    if (widget.speed >= maxSpeed && !AudioService.running) {
-      await AudioService.start(backgroundTaskEntrypoint: _entrypoint);
-      return;
+      if (widget.speed >= maxSpeed && !AudioService.running) {
+        await AudioService.start(backgroundTaskEntrypoint: _entrypoint);
+        return;
+      }
+
+      if (widget.speed >= maxSpeed) {
+        await AudioService.play();
+        return;
+      }
+
+      if (widget.speed < maxSpeed && AudioService.running) {
+        await AudioService.stop();
+      }
     }
-
-    if (widget.speed >= maxSpeed) {
-      await AudioService.play();
-      return;
-    }
-
-    if (widget.speed < maxSpeed && AudioService.running) {
-      await AudioService.stop();
-    }
-  }
-*/
-
-  Future<Config> loadSpeedometerConfig() async {
-    String configString =
-    await rootBundle.loadString("assets/tachometers/$loadedTachometerTheme/theme_config.ini");
-    return Config.fromString(configString);
-  }
+  */
 
   Widget speedometer(Config tachometerConfig, Stream stream) {
+    String loadedTheme = widget.theme;
+    String speedUnit = widget.speedUnit;
+
     return Container(
       child: Column(
         children: [
           StreamBuilder(
               stream: stream,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Text('Caricando...');
+                double speed = 0;
+
+                if (snapshot.data != null) {
+                  var data = snapshot.data as LocationData;
+                  speed = roundedSpeed(data.speed ?? 0);
                 }
 
-                if (snapshot.hasError) {
-                  return Text(snapshot.error.toString());
+                if (speedUnit == 'mph') {
+                  speed = toMph(speed);
                 }
-
-                var data = snapshot.data as LocationData;
-                double speed = double.parse(((data.speed ?? 0) * 3.6).toStringAsFixed(2));
                 return Text(
-                  "$speed km/h",
+                  "${roundedSpeed(speed)} $speedUnit",
                   textAlign: TextAlign.center,
                 );
               }),
@@ -163,26 +120,25 @@ class _SpeedometerState extends State<Speedometer> {
               children: [
                 // Tachometer background
                 Image.asset(
-                  "assets/tachometers/$loadedTachometerTheme/background/background.png",
+                  "assets/tachometers/${widget.theme}/background/background.png",
                   width:
-                  double.parse(tachometerConfig.get('Background', 'background_width') ?? '0'),
+                      double.parse(tachometerConfig.get('Background', 'background_width') ?? '0'),
                   height:
-                  double.parse(tachometerConfig.get('Background', 'background_height') ?? '0'),
+                      double.parse(tachometerConfig.get('Background', 'background_height') ?? '0'),
                 ),
                 // Unità di misura (km/h)
                 Positioned(
-                  child: Image.asset("assets/tachometers/$loadedTachometerTheme/speed_unit/kmh.png",
+                  child: Image.asset("assets/tachometers/$loadedTheme/speed_unit/$speedUnit.png",
                       width: double.parse(tachometerConfig.get('Speed Unit', 'unit_width') ?? '0'),
                       height:
-                      double.parse(tachometerConfig.get('Speed Unit', 'unit_height') ?? '0')),
+                          double.parse(tachometerConfig.get('Speed Unit', 'unit_height') ?? '0')),
                   top: double.parse(tachometerConfig.get('Speed Unit', 'unit_y') ?? '0'),
                   left: double.parse(tachometerConfig.get('Speed Unit', 'unit_x') ?? '0'),
                 ),
-                // Codice per visualizzare la freccia del tachimetro
                 // Etichette degli RPM
                 Positioned(
                   child: Image.asset(
-                    "assets/tachometers/$loadedTachometerTheme/background/labels_20k.png",
+                    "assets/tachometers/$loadedTheme/background/labels_20k.png",
                     width: double.parse(tachometerConfig.get('RPM Gauge', 'gauge_width') ?? '0'),
                     height: double.parse(tachometerConfig.get('RPM Gauge', 'gauge_height') ?? '0'),
                   ),
@@ -193,17 +149,33 @@ class _SpeedometerState extends State<Speedometer> {
                 StreamBuilder(
                     stream: widget.stream,
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return showSpeed(0, tachometerConfig);
+                      double speedDigitWidth =
+                          double.parse(tachometerConfig.get('Speed', 'speed_width') ?? '0');
+                      double speedDigitHeight =
+                          double.parse(tachometerConfig.get('Speed', 'speed_height') ?? '0');
+                      double speedDigitY =
+                          double.parse(tachometerConfig.get('Speed', 'speed_y') ?? '0');
+                      double speedDigitX =
+                          double.parse(tachometerConfig.get('Speed', 'speed_x') ?? '0');
+
+                      double speed = 0;
+
+                      if (snapshot.data != null) {
+                        var data = snapshot.data as LocationData;
+                        speed = data.speed ?? 0;
                       }
 
-                      if (snapshot.hasError) {
-                        return showSpeed(0, tachometerConfig);
+                      if (speedUnit == 'mph') {
+                        speed = toMph(speed);
                       }
 
-                      var data = snapshot.data as LocationData;
-                      double speed = double.parse(((data.speed ?? 0) * 3.6).toStringAsFixed(2));
-                      return showSpeed(speed, tachometerConfig);
+                      return SpeedometerSpeedDigits(
+                          speed: roundedSpeed(speed),
+                          speedDigitWidth: speedDigitWidth,
+                          speedDigitHeight: speedDigitHeight,
+                          speedDigitX: speedDigitX,
+                          speedDigitY: speedDigitY,
+                          theme: widget.theme);
                     }),
                 // TOOD: cercare di capire come aggiungere la lancetta basata sui Km/h
                 showSpeedIndicator(tachometerConfig),
@@ -213,5 +185,13 @@ class _SpeedometerState extends State<Speedometer> {
         ],
       ),
     );
+  }
+
+  double toMph(double speedKmh) {
+    return speedKmh / 1.609;
+  }
+
+  double roundedSpeed(double rawSpeed) {
+    return double.parse((rawSpeed).toStringAsFixed(2));
   }
 }
