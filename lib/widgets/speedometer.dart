@@ -13,6 +13,7 @@ class Speedometer extends StatefulWidget {
   final Stream stream;
   final Config tachometerConfig;
   final String theme;
+  final String digitsTheme;
   final String speedUnit;
 
   Speedometer({
@@ -20,6 +21,7 @@ class Speedometer extends StatefulWidget {
     required this.tachometerConfig,
     required this.theme,
     required this.speedUnit,
+    required this.digitsTheme,
   });
 
   @override
@@ -172,7 +174,8 @@ class _SpeedometerState extends State<Speedometer> {
                           speedDigitHeight: speedDigitHeight,
                           speedDigitX: speedDigitX,
                           speedDigitY: speedDigitY,
-                          theme: widget.theme
+                          theme: widget.theme,
+                          digitsTheme: widget.digitsTheme,
                       );
                     }),
                 // TOOD: cercare di capire come aggiungere la lancetta basata sui Km/h

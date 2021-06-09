@@ -59,10 +59,16 @@ flutter:
     - assets/tachometers/D4/
     - assets/tachometers/D5/
     - assets/tachometers/D6/
+    - assets/tachometers/D6/background/
+    - assets/tachometers/D6/speed_unit/
+    - assets/tachometers/D6/speed_digits/
+    - assets/tachometers/D6/rpm_bar/
     - assets/tachometers/D7/
     - assets/tachometers/D7/background/
     - assets/tachometers/D7/speed_unit/
     - assets/tachometers/D7/speed_yellow/
+    - assets/tachometers/D7/speed_red/
+    - assets/tachometers/D7/speed_blue/
     - assets/tachometers/D7/rpm_bar/
 
   # An image asset can refer to one or more resolution-specific "variants", see

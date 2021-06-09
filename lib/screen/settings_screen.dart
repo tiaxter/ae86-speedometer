@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 class SettingsScreen extends StatefulWidget {
-
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
@@ -13,8 +12,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
 
   String _speedUnit = '';
+  String? _speedDigitsTheme;
   String _theme = '';
-
 
   @override
   void initState() {
@@ -26,6 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Box box = Hive.box('app');
     _speedUnit = box.get('speed_unit', defaultValue: 'kmh');
     _theme = box.get('theme', defaultValue: 'D7');
+    _speedDigitsTheme = box.get('speed_digits_theme', defaultValue: null);
   }
 
   @override
@@ -37,10 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         body: Form(
           key: _formKey,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-                vertical: 8,
-                horizontal: 16
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             child: Column(
               children: [
                 // Speed unit
@@ -76,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             groupValue: _speedUnit,
                             onChanged: (String? value) async {
                               await Hive.box('app').put('speed_unit', value);
-                              setState(() =>_speedUnit = value ?? '');
+                              setState(() => _speedUnit = value ?? '');
                             },
                           ),
                           Text('Mp/h')
@@ -90,48 +87,80 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     Text('Theme:'),
                     FutureBuilder(
-                        future: loadThemesList(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return Text(snapshot.error.toString());
-                          }
+                      future: loadThemesList(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Text(snapshot.error.toString());
+                        }
 
-                          if (snapshot.data == null) {
-                            return Center(
-                               child: CircularProgressIndicator(),
-                            );
-                          }
-
-                          var dirs = (snapshot.data as List<String>);
-
-                          return SizedBox(
-                            height: 200,
-                            child: ListView.builder(
-                                itemCount: dirs.length,
-                                itemBuilder: (_, index) {
-                                  return ListTile(
-                                    leading: Radio(
-                                      groupValue: _theme,
-                                      value: dirs[index],
-                                      onChanged: (String? value) async {
-                                        await Hive.box('app').put('theme', value);
-                                        setState(() => _theme = value ?? '');
-                                      },
-                                    ),
-                                    title: Text(dirs[index]),
-                                  );
-                                }
-                            ),
+                        if (snapshot.data == null) {
+                          return Center(
+                            child: CircularProgressIndicator(),
                           );
-                        },
+                        }
+
+                        var dirs = (snapshot.data as List<String>);
+
+                        return DropdownButton<String>(
+                            isExpanded: true,
+                            isDense: true,
+                            value: _theme,
+                            items: dirs
+                                .map((e) => DropdownMenuItem(
+                                      value: e,
+                                      child: Text(e),
+                                    ))
+                                .toList(),
+                            onChanged: (String? value) async {
+                              List<String> speedDigitsTheme = await loadSpeedDigitsTheme(value);
+                              Hive.box('app').put('theme', value);
+                              Hive.box('app').put('speed_digits_theme', speedDigitsTheme.first);
+                              setState(() {
+                                _theme = value ?? 'D7';
+                                _speedDigitsTheme = speedDigitsTheme.first;
+                              });
+                            });
+                      },
+                    )
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text('Speed digits theme'),
+                    FutureBuilder(
+                      future: loadSpeedDigitsTheme(_theme),
+                      builder: (context, snapshot) {
+                        if (snapshot.data == null) {
+                          return Text('Loading...');
+                        }
+
+                        List<String> speedDigitsThemes = (snapshot.data as List<String>);
+
+                        return DropdownButton(
+                          isExpanded: true,
+                          isDense: true,
+                          value: _speedDigitsTheme,
+                          items: speedDigitsThemes
+                              .map((e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(e),
+                                  ))
+                              .toList(),
+                          onChanged: (String? value) {
+                            Hive.box('app').put('speed_digits_theme', value);
+                            setState(() {
+                              _speedDigitsTheme = value ?? 'speed_blue';
+                            });
+                          },
+                        );
+                      },
                     )
                   ],
                 )
               ],
             ),
           ),
-        )
-    );
+        ));
   }
 
   Future<List<String>> loadThemesList() async {
@@ -143,8 +172,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return manifestMap.keys
         .where((String key) => re.hasMatch(key))
+        .map((String key) => re.stringMatch(key) ?? '')
+        .toSet()
+        .toList();
+  }
+
+  Future<List<String>> loadSpeedDigitsTheme([String? theme]) async {
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+
+    return manifestMap.keys
+        .where((String key) =>
+            key.contains('assets/tachometers/${theme ?? _theme}/speed_') && !key.contains('speed_unit'))
         .map((String key) {
-          return re.stringMatch(key) ?? '';
+          final startString = 'assets/tachometers/${theme ?? _theme}/';
+          final startIndex = key.indexOf(startString);
+          final endIndex = key.indexOf('/', startIndex + startString.length);
+
+          return key.substring(
+              startIndex + startString.length, endIndex
+          ).trim();
         })
         .toSet()
         .toList();

@@ -7,6 +7,7 @@ class SpeedometerSpeedDigits extends StatelessWidget {
   final double speedDigitX;
   final double speedDigitY;
   final String theme;
+  final String digitsTheme;
 
   SpeedometerSpeedDigits(
       {Key? key,
@@ -15,7 +16,8 @@ class SpeedometerSpeedDigits extends StatelessWidget {
       required this.speedDigitHeight,
       required this.speedDigitX,
       required this.speedDigitY,
-      required this.theme})
+      required this.theme,
+      required this.digitsTheme})
       : super(key: key);
 
   @override
@@ -26,7 +28,7 @@ class SpeedometerSpeedDigits extends StatelessWidget {
 
     for (int i = 0; i < roundedSpeed.length; i++) {
       widgets.add(Image.asset(
-        "assets/tachometers/$theme/speed_yellow/speed_digits_${roundedSpeed[i]}.png",
+        "assets/tachometers/$theme/$digitsTheme/speed_digits_${roundedSpeed[i]}.png",
         width: speedDigitWidth,
         height: speedDigitHeight,
       ));

@@ -69,6 +69,7 @@ class SpeedometerScreen extends StatelessWidget {
             builder: (context, Box box, widget) {
               String theme = box.get('theme', defaultValue: 'D7');
               String speedUnit = box.get('speed_unit', defaultValue: 'kmh');
+              String speedDigitsTheme = box.get('speed_digits_theme', defaultValue: 'speed_blue');
 
               return FutureBuilder(
                 future: _loadTachometerConfig(theme),
@@ -82,6 +83,7 @@ class SpeedometerScreen extends StatelessWidget {
                     tachometerConfig: (snapshot.data as Config),
                     theme: theme,
                     speedUnit: speedUnit,
+                    digitsTheme: speedDigitsTheme,
                   );
                 },
               );
