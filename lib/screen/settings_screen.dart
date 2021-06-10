@@ -112,13 +112,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ))
                                 .toList(),
                             onChanged: (String? value) async {
-                              List<String> speedDigitsTheme = await loadSpeedDigitsTheme(value);
+                              if (value == null) {
+                                return;
+                              }
                               Hive.box('app').put('theme', value);
-                              Hive.box('app').put('speed_digits_theme', speedDigitsTheme.first);
-                              setState(() {
-                                _theme = value ?? 'D7';
-                                _speedDigitsTheme = speedDigitsTheme.first;
-                              });
+                              setState(() => _theme = value);
                             });
                       },
                     )
@@ -134,7 +132,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           return Text('Loading...');
                         }
 
+                        // Lista dei temi delle cifre della velocità
                         List<String> speedDigitsThemes = (snapshot.data as List<String>);
+
+                        // Se il tema nello stato non è contenuto nei temi del tema del tachimetro
+                        if (!speedDigitsThemes.contains(_speedDigitsTheme)) {
+                          // Allora imposto come tema delle cifre il primo disponibile
+                          _speedDigitsTheme = speedDigitsThemes.first;
+                          Hive.box('app').put('speed_digits_theme', _speedDigitsTheme);
+                        }
 
                         return DropdownButton(
                           isExpanded: true,
@@ -147,10 +153,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ))
                               .toList(),
                           onChanged: (String? value) {
+                            if (value == null) {
+                              return;
+                            }
                             Hive.box('app').put('speed_digits_theme', value);
-                            setState(() {
-                              _speedDigitsTheme = value ?? 'speed_blue';
-                            });
+                            setState(() => _speedDigitsTheme = value);
                           },
                         );
                       },
