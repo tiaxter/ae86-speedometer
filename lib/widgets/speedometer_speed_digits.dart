@@ -23,7 +23,6 @@ class SpeedometerSpeedDigits extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String roundedSpeed = (speed.toInt()).toString();
-    print(roundedSpeed);
     List<Widget> widgets = [];
 
     for (int i = 0; i < roundedSpeed.length; i++) {

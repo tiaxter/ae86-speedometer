@@ -1,13 +1,10 @@
 import 'dart:math';
 import 'package:ae86_speedometer/utils/speed_utils.dart';
 import 'package:ae86_speedometer/widgets/speedometer_speed_digits.dart';
-import 'package:ae86_speedometer/tasks/play_chime_background_task.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:ini/ini.dart';
 import 'package:location/location.dart';
 
-void _entrypoint() => AudioServiceBackground.run(() => PlayChimeBackgroundTask());
 
 class Speedometer extends StatefulWidget {
   final Stream stream;
@@ -29,8 +26,6 @@ class Speedometer extends StatefulWidget {
 }
 
 class _SpeedometerState extends State<Speedometer> {
-  final double maxSpeed = 10;
-
   @override
   Widget build(BuildContext context) {
     // playChime();
@@ -68,26 +63,6 @@ class _SpeedometerState extends State<Speedometer> {
       ),
     );
   }
-
-  /*
-    void playChime() async {
-      AudioService.connect();
-
-      if (widget.speed >= maxSpeed && !AudioService.running) {
-        await AudioService.start(backgroundTaskEntrypoint: _entrypoint);
-        return;
-      }
-
-      if (widget.speed >= maxSpeed) {
-        await AudioService.play();
-        return;
-      }
-
-      if (widget.speed < maxSpeed && AudioService.running) {
-        await AudioService.stop();
-      }
-    }
-  */
 
   Widget speedometer(Config tachometerConfig, Stream stream) {
     String loadedTheme = widget.theme;

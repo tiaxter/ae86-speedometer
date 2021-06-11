@@ -82,6 +82,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ])
                   ],
                 ),
+                // Speed chime trigger
+                Column(
+                  children: [
+                    Text('Speed chime trigger'),
+                    TextFormField(
+                      initialValue: Hive.box('app').get('chime_speed_trigger', defaultValue: 0).toString(),
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Enter speed chime trigger',
+                      ),
+                      onChanged: (String value) {
+                        double val = double.parse(value);
+                        Hive.box('app').put('chime_speed_trigger', val);
+                      },
+                    )
+                  ],
+                ),
                 // Theme
                 Column(
                   children: [
@@ -122,6 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     )
                   ],
                 ),
+                // Speed digits themes
                 Column(
                   children: [
                     Text('Speed digits theme'),

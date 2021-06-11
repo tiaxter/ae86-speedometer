@@ -1,50 +1,16 @@
+import 'package:ae86_speedometer/utils/speed_utils.dart';
 import 'package:ae86_speedometer/widgets/speedometer.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ini/ini.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:location/location.dart';
+import 'package:ae86_speedometer/tasks/play_chime_background_task.dart';
+import 'package:audio_service/audio_service.dart';
+
+void _entrypoint() => AudioServiceBackground.run(() => PlayChimeBackgroundTask());
 
 class SpeedometerScreen extends StatelessWidget {
-  Future<Stream> _determinePosition() async {
-    bool serviceEnabled;
-    PermissionStatus permission;
-
-    Location location = new Location();
-
-    // Imposto l'accuratezza del GPS alta
-    location.changeSettings(
-        accuracy: LocationAccuracy.navigation, distanceFilter: 10);
-
-    // Verifico se il servizio è abilitato
-    serviceEnabled = await location.serviceEnabled();
-    // Se non è abilitato richiedo all'utente di abilitarlo
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-    }
-    // Se non è abilitato allora lancio un errore
-    if (!serviceEnabled) {
-      return Future.error('The service cannot be enabled');
-    }
-
-    // Verifico che all'applicazione sia permesso di utilizzare il GPS
-    permission = await location.hasPermission();
-    // Se il permesso è negato allora chiedo all'utente il permesso
-    if (permission == PermissionStatus.denied) {
-      permission = await location.requestPermission();
-    }
-    // Se il permesso è negato per sempre allora lancio un errore
-    if (permission == PermissionStatus.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    // Altrimenti restituisco lo stream al quale mi iscriverò per ricevere i vari
-    // valore
-    return location.onLocationChanged;
-  }
-
   Future<Config> _loadTachometerConfig(String theme) async {
     String configString = await rootBundle.loadString("assets/tachometers/$theme/theme_config.ini");
     return Config.fromString(configString);
@@ -53,7 +19,7 @@ class SpeedometerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _determinePosition(),
+        future: SpeedUtils.determinePosition(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator();
@@ -64,6 +30,9 @@ class SpeedometerScreen extends StatelessWidget {
           }
 
           Stream stream = snapshot.data as Stream;
+
+          subscribeToStream(stream);
+
           return ValueListenableBuilder(
             valueListenable: Hive.box('app').listenable(),
             builder: (context, Box box, widget) {
@@ -90,5 +59,42 @@ class SpeedometerScreen extends StatelessWidget {
             },
           );
         });
+  }
+
+  void subscribeToStream(Stream stream) {
+    stream.listen((event) {
+      playChime(event);
+
+      Hive.box('app').listenable(keys: ['chime_enabled', 'chime_speed_trigger']).addListener(() {
+        playChime(event);
+      });
+    });
+  }
+
+  void playChime (event) async {
+    print(Hive.box('app').get('chime_enabled'));
+
+    if (!Hive.box('app').get('chime_enabled', defaultValue: false)) {
+      return;
+    }
+
+    double maxSpeed = Hive.box('app').get('chime_speed_trigger', defaultValue: 0.0);
+    AudioService.connect();
+
+    if (event.speed >= maxSpeed && !AudioService.running) {
+      print('Maximum speed and player is running');
+      await AudioService.start(backgroundTaskEntrypoint: _entrypoint);
+      return;
+    }
+
+    if (event.speed >= maxSpeed) {
+      print('Maximum speed');
+      await AudioService.play();
+      return;
+    }
+
+    if (event.speed < maxSpeed && AudioService.running) {
+      await AudioService.pause();
+    }
   }
 }
