@@ -89,6 +89,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         labelText: 'Enter speed chime trigger',
                       ),
                       onChanged: (String value) {
+                        if (value.isEmpty) {
+                          value = '0';
+                        }
                         double val = double.parse(value);
                         Hive.box('app').put('chime_speed_trigger', val);
                       },
