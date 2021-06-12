@@ -32,6 +32,11 @@ class Ae86TachometerBackground extends CustomPainter {
     ..strokeWidth = 2
     ..style = PaintingStyle.stroke;
 
+  final speedIndicatorPaint = Paint()
+  ..color = Colors.lightBlueAccent
+  ..strokeWidth = 2
+  ..style = PaintingStyle.fill;
+
   @override
   void paint(Canvas canvas, Size size) {
     canvas.drawArc(
@@ -43,14 +48,6 @@ class Ae86TachometerBackground extends CustomPainter {
       (20 + 180 + 180 / 6) * (pi / 180),
       false,
       _paint,
-    );
-
-    canvas.drawOval(
-        Rect.fromCircle(
-            center: Offset(size.width/2, size.height/2),
-            radius: 2
-        ),
-        circlePaint
     );
 
     // region Bold Speed Labels
@@ -153,6 +150,47 @@ class Ae86TachometerBackground extends CustomPainter {
     );
 
     // endregion
+
+    // region Speed indicator
+    Size arrowSize = Size(100, 10);
+    Size rectSize = Size(110, 10);
+
+    Path speedIndicatorPath = new Path();
+    speedIndicatorPath.moveTo(0, arrowSize.height/2);
+    speedIndicatorPath.lineTo(arrowSize.width, 0);
+    speedIndicatorPath.lineTo(arrowSize.width, arrowSize.height);
+    speedIndicatorPath.close();
+    speedIndicatorPath.addRect(
+        Rect.fromLTWH(
+        arrowSize.width,
+        0,
+        rectSize.width,
+        rectSize.height
+      )
+    );
+    Rect speedIndicatorBounds = speedIndicatorPath.getBounds();
+    speedIndicatorPath = speedIndicatorPath.shift(
+      Offset(
+          (size.width - speedIndicatorBounds.width)/2 - (rectSize.width/2),
+          (size.height * 9/16) - speedIndicatorBounds.height/2
+      )
+    );
+
+    canvas.drawPath(speedIndicatorPath, speedIndicatorPaint);
+
+    // endregion
+
+    //
+    canvas.drawOval(
+        Rect.fromCircle(
+            center: Offset(
+                size.width/2,
+                size.height * 9/16,
+            ),
+            radius: 20
+        ),
+        circlePaint
+    );
 
   }
 
