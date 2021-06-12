@@ -48,20 +48,21 @@ class SpeedometerScreen extends StatelessWidget {
       return;
     }
 
+    double speed = SpeedUtils.fromMSecondToKmHour(event.speed);
     double maxSpeed = Hive.box('app').get('chime_speed_trigger', defaultValue: 0.0);
     AudioService.connect();
 
-    if (event.speed >= maxSpeed && !AudioService.running) {
+    if (speed >= maxSpeed && !AudioService.running) {
       await AudioService.start(backgroundTaskEntrypoint: _entrypoint);
       return;
     }
 
-    if (event.speed >= maxSpeed) {
+    if (speed >= maxSpeed) {
       await AudioService.play();
       return;
     }
 
-    if (event.speed < maxSpeed && AudioService.running) {
+    if (speed < maxSpeed && AudioService.running) {
       await AudioService.pause();
     }
   }
