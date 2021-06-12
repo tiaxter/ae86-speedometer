@@ -35,7 +35,10 @@ class Ae86TachometerBackground extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.drawArc(
-      Rect.fromLTWH(0, 0, size.width, size.height),
+      Rect.fromCircle(
+          center: Offset(size.width/2, size.height/2),
+          radius: 150
+      ),
       150 * (pi / 180),
       (20 + 180 + 180 / 6) * (pi / 180),
       false,
@@ -43,35 +46,12 @@ class Ae86TachometerBackground extends CustomPainter {
     );
 
     canvas.drawOval(
-        Rect.fromLTWH(
-            (size.width / 2) - (5 / 2),
-            (size.height / 2) - 5 / 2,
-            5,
-            5
+        Rect.fromCircle(
+            center: Offset(size.width/2, size.height/2),
+            radius: 2
         ),
         circlePaint
     );
-
-
-    /*canvas.drawLine(Offset(0, size.height / 2), Offset(size.width, size.height / 2), redPaint);
-
-    canvas.drawLine(Offset(size.width / 2, 0), Offset(size.width / 2, size.height), redPaint);*/
-
-    /*canvas.drawArc(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      -pi,
-      pi,
-      false,
-      redPaint,
-    );
-
-    canvas.drawArc(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      pi,
-      -pi,
-      false,
-      bluePaint,
-    );*/
 
     // region Bold Speed Labels
     for (int i = 0; i <= 8; i++) {
@@ -79,7 +59,10 @@ class Ae86TachometerBackground extends CustomPainter {
       double startAngle = (11 / 12 * pi) + ((((pi + ((pi / 12) * 2)) / 8) * i) - (sweep / 2));
 
       canvas.drawArc(
-        Rect.fromLTWH(0, 0, size.width, size.height),
+        Rect.fromCircle(
+            center: Offset(size.width/2, size.height/2),
+            radius: 150
+        ),
         startAngle,
         sweep,
         false,
@@ -188,7 +171,10 @@ class Ae86TachometerBackground extends CustomPainter {
       double startAngle = (11 / 12 * pi) + ((spaceBetweenNotches * i) - (sweep/2));
 
       canvas.drawArc(
-        Rect.fromLTWH(0, 0, size.width, size.height),
+        Rect.fromCircle(
+            center: Offset(size.width/2, size.height/2),
+            radius: 150
+        ),
         startAngle,
         sweep,
         false,
