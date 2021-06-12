@@ -19,7 +19,7 @@ class Ae86TachometerBackground extends CustomPainter {
 
   final boldLabelPaint = Paint()
     ..color = Colors.white
-    ..strokeWidth = 20
+    ..strokeWidth = 15
     ..style = PaintingStyle.stroke;
 
   final redPaint = Paint()
