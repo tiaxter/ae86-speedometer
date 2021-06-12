@@ -1,5 +1,4 @@
 import 'package:ae86_speedometer/utils/speed_utils.dart';
-import 'package:ae86_speedometer/widgets/ae86_tachometer_background.dart';
 import 'package:ae86_speedometer/widgets/speedometer.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';

@@ -13,32 +13,39 @@ class MainScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text('AE86 Speedometer'),
           actions: [
-            ValueListenableBuilder(
-                valueListenable: Hive.box('app').listenable(keys: ['chime_enabled']),
-                builder: (context, Box box, snapshot) {
-                  if (box.get('chime_enabled', defaultValue: true)) {
-                    return IconButton(
-                        onPressed: () async {
-                          box.put('chime_enabled', false);
-                          AudioService.connect();
-                          await AudioService.pause();
-                        },
-                        icon: Icon(Icons.pause));
-                  }
-
-                  return IconButton(
-                      onPressed: () {
-                        box.put('chime_enabled', true);
-                      },
-                      icon: Icon(Icons.play_arrow));
-                }),
             IconButton(
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()));
               },
-              icon: Icon(Icons.app_settings_alt),
+              icon: Icon(Icons.settings),
             )
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            Box box = Hive.box('app');
+            String chimeEnabledKey = 'chime_enabled';
+
+            if (box.get(chimeEnabledKey, defaultValue: true)) {
+              box.put(chimeEnabledKey, false);
+              AudioService.connect();
+              await AudioService.pause();
+              return;
+            }
+
+            box.put(chimeEnabledKey, true);
+          },
+          child: ValueListenableBuilder(
+              valueListenable: Hive.box('app').listenable(keys: ['chime_enabled']),
+              builder: (context, Box box, snapshot) {
+                String chimeEnabledKey = 'chime_enabled';
+
+                if (box.get(chimeEnabledKey, defaultValue: true)) {
+                  return Icon(Icons.pause);
+                }
+
+                return Icon(Icons.play_arrow);
+              }),
         ),
         body: SpeedometerScreen());
   }
