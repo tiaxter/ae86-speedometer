@@ -9,6 +9,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color.fromRGBO(67, 67, 67, 1.0),
         appBar: AppBar(
           title: Text('AE86 Speedometer'),
           actions: [

@@ -1,6 +1,10 @@
 import 'package:location/location.dart';
 
 class SpeedUtils {
+  static double fromMSecondToKmHour(double speed) {
+    return speed * 3.6;
+  }
+
   static double getIntVal(double rawSpeed) {
     return double.parse(rawSpeed.toStringAsFixed(2));
   }

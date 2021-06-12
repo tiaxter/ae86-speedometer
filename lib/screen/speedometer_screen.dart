@@ -1,21 +1,15 @@
 import 'package:ae86_speedometer/utils/speed_utils.dart';
+import 'package:ae86_speedometer/widgets/ae86_tachometer_background.dart';
 import 'package:ae86_speedometer/widgets/speedometer.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:ini/ini.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:ae86_speedometer/tasks/play_chime_background_task.dart';
 import 'package:audio_service/audio_service.dart';
 
 void _entrypoint() => AudioServiceBackground.run(() => PlayChimeBackgroundTask());
 
 class SpeedometerScreen extends StatelessWidget {
-  Future<Config> _loadTachometerConfig(String theme) async {
-    String configString = await rootBundle.loadString("assets/tachometers/$theme/theme_config.ini");
-    return Config.fromString(configString);
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -33,30 +27,8 @@ class SpeedometerScreen extends StatelessWidget {
 
           subscribeToStream(stream);
 
-          return ValueListenableBuilder(
-            valueListenable: Hive.box('app').listenable(),
-            builder: (context, Box box, widget) {
-              String theme = box.get('theme', defaultValue: 'D7');
-              String speedUnit = box.get('speed_unit', defaultValue: 'kmh');
-              String speedDigitsTheme = box.get('speed_digits_theme', defaultValue: 'speed_blue');
-
-              return FutureBuilder(
-                future: _loadTachometerConfig(theme),
-                builder: (context, snapshot) {
-                  if (snapshot.data == null) {
-                    return Text('Loading...');
-                  }
-
-                  return Speedometer(
-                    stream: stream,
-                    tachometerConfig: (snapshot.data as Config),
-                    theme: theme,
-                    speedUnit: speedUnit,
-                    digitsTheme: speedDigitsTheme,
-                  );
-                },
-              );
-            },
+          return Speedometer(
+            stream: stream,
           );
         });
   }
@@ -72,8 +44,6 @@ class SpeedometerScreen extends StatelessWidget {
   }
 
   void playChime (event) async {
-    print(Hive.box('app').get('chime_enabled'));
-
     if (!Hive.box('app').get('chime_enabled', defaultValue: false)) {
       return;
     }
@@ -82,13 +52,11 @@ class SpeedometerScreen extends StatelessWidget {
     AudioService.connect();
 
     if (event.speed >= maxSpeed && !AudioService.running) {
-      print('Maximum speed and player is running');
       await AudioService.start(backgroundTaskEntrypoint: _entrypoint);
       return;
     }
 
     if (event.speed >= maxSpeed) {
-      print('Maximum speed');
       await AudioService.play();
       return;
     }

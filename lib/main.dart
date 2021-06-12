@@ -2,6 +2,7 @@ import 'package:ae86_speedometer/screen/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:wakelock/wakelock.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -12,6 +13,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Wakelock.enable();
     return MaterialApp(
         title: 'AE86 Speedometer',
         theme: ThemeData(
