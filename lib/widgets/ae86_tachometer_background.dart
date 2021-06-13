@@ -170,11 +170,13 @@ class Ae86TachometerBackground extends CustomPainter {
     );
     Rect speedIndicatorBounds = speedIndicatorPath.getBounds();
 
+    double speedIndicatorRotationAngle = fromSpeedToAngle(speed);
+
     rotate(
         canvas,
         size.width/2,
         (size.height * 9/16),
-        -pi/8
+        speedIndicatorRotationAngle
     );
 
     speedIndicatorPath = speedIndicatorPath.shift(
@@ -256,5 +258,9 @@ class Ae86TachometerBackground extends CustomPainter {
     canvas.translate(cx, cy);
     canvas.rotate(angle);
     canvas.translate(-cx, -cy);
+  }
+
+  double fromSpeedToAngle(speed) {
+    return - pi/8;
   }
 }
