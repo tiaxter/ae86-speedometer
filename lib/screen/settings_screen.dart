@@ -87,6 +87,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Enter speed chime trigger',
+                        suffixText: _speedUnit
                       ),
                       onChanged: (String value) {
                         if (value.isEmpty) {
