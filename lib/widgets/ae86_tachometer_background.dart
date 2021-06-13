@@ -169,6 +169,14 @@ class Ae86TachometerBackground extends CustomPainter {
       )
     );
     Rect speedIndicatorBounds = speedIndicatorPath.getBounds();
+
+    rotate(
+        canvas,
+        size.width/2,
+        (size.height * 9/16),
+        -pi/8
+    );
+
     speedIndicatorPath = speedIndicatorPath.shift(
       Offset(
           (size.width - speedIndicatorBounds.width)/2 - (rectSize.width/2),
@@ -241,5 +249,12 @@ class Ae86TachometerBackground extends CustomPainter {
     );
     final offset = Offset(x - (textPainter.width/2), y - (textPainter.height/2));
     textPainter.paint(canvas, offset);
+  }
+
+  // https://stackoverflow.com/a/58042892/9275679
+  void rotate(Canvas canvas, double cx, double cy, double angle) {
+    canvas.translate(cx, cy);
+    canvas.rotate(angle);
+    canvas.translate(-cx, -cy);
   }
 }
